@@ -126,6 +126,57 @@ service docker status
 sudo kubectl get nodes
 
 ```
+# Pod Creation in Kubernetes
+
+```
+Steps to be followed:
+1.	Creating multi-container pods
+2.	Creating a single container pod
+
+Step 1: Creating multi-container pods
+1.1	On the master node, create a new file named sample.yaml:
+
+sudo su
+vi sample.yaml
+1.2	Add the following code in the multi-container.yaml file:
+https://github.com/manikcloud/k8s/blob/main/pods/multi-container.yaml
+
+1.3	Use the following command to create the multi-container pod:
+
+kubectl create -f sample.yaml
+ 
+
+Step 2: Creating a single container pod
+2.1	On the master node, create a single container pod with a tomcat image using the following command:
+kubectl run tomcat --image=tomcat:8.0
+ 
+
+2.2	Check all the running pods
+kubectl get pods
+ 
+2.3	To check why exactly a pod is in the pending state, run the command
+kubectl describe pods <pod_name>
+To check why multi-container pod is pending,use the command
+kubectl describe pods multi-container
+```
+ 
+ 
+## 2.4	To remove the taint from the node run the following commands:
+```
+kubectl get nodes
+
+Copy the node name and use it in the below command
+kubectl taint nodes  <node name> node-role.kubernetes.io/master-
+
+Here for example we use the command given below
+
+kubectl taint nodes  ip-172-31-17-206 node-role.kubernetes.io/master-
+ 
+2.5	Now check the pod status. The pods should be in the running state.
+sudo kubectl get pods 
+
+```
+
 # Dashboard
 ```
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.1/aio/deploy/recommended.yaml
@@ -145,29 +196,10 @@ awk '$1=="token:"{print $2}'
 ```
 There are 4 distinct commands and they get called in this order:
 
-Line 2 - This is the first command from @silverfox's Token section.
-Line 3 - Print only the first field of the line beginning with deployment-controller-token- (which is the pod name)
-Line 1 - This is the second command from @silverfox's Token section.
-Line 5 - Print only the second field of the line whose first field is "token:"
-
-# Cleanup 
-```
-docker ps 
-kubeadm reset -f
-rm -rf /etc/cni /etc/kubernetes /var/lib/dockershim /var/lib/etcd /var/lib/kubelet /var/run/kubernetes ~/.kube/*
-v
-apt remove -y kubeadm kubectl kubelet kubernetes-cni
-sudo apt-get purge kubeadm kubectl kubelet kubernetes-cni kube* 
-sudo apt-get autoremove
-sudo rm -rf ~/.kube
-docker ps
-system restart docker 
-systemctl restart docker 
-
-history | cut -c 8- > history.txt
-
-
-```
+- Line 1 - This is the second command from @silverfox's Token section.
+- Line 2 - This is the first command from @silverfox's Token section.
+- Line 3 - Print only the first field of the line beginning with deployment-controller-token- (which is the pod name)
+- Line 5 - Print only the second field of the line whose first field is "token:"
 
 # ReplicaSet
 
@@ -190,7 +222,70 @@ kubectl get replicaset sl-replicaset
  
 kubectl get replicaset sl-replicaset
 ```
+# Deployment
+```
+kubectl create -f deployment/deployment.yaml 
+kubectl get pods -o wide
 
+kubectl get deployment
+kubectl get deployment -o wide
+
+
+kubectl describe deployment
+
+kubectl create -f deployment/deployment.yaml 
+kubectl get pods -o wide 
+
+kubectl rollout history deployment/web-app-deployment 
+
+kubectl delete deployment web-app-deployment
+kubectl get pods -o wide 
+
+kubectl create -f deployment/deployment.yaml  --record
+kubectl rollout history deployment/web-app-deployment 
+
+kubectl edit deployment web-app-deployment  --record
+kubectl rollout history deployment/web-app-deployment 
+kubectl rollout status deployment/web-app-deployment 
+kubectl get pods -o wide 
+
+kubectl describe deployment web-app-deployment 
+kubectl rollout status deployment/web-app-deployment 
+
+kubectl set image deployment web-app-deployment blue=varunmanik/httpd:v1-blue --record
+kubectl get pods -o wide
+kubectl rollout history deployment web-app-deployment 
+
+# scaling 
+kubectl scale deployment web-app-deployment --replicas=6
+
+```
+
+# Cleanup 
+
+- Run this command to cleanup
+```
+sh installation/cleanup.sh
+```
+- OR copy and paste below commands one by one.
+
+```
+docker ps 
+kubeadm reset -f
+rm -rf /etc/cni /etc/kubernetes /var/lib/dockershim /var/lib/etcd /var/lib/kubelet /var/run/kubernetes ~/.kube/*
+v
+apt remove -y kubeadm kubectl kubelet kubernetes-cni
+sudo apt-get purge kubeadm kubectl kubelet kubernetes-cni kube* 
+sudo apt-get autoremove
+sudo rm -rf ~/.kube
+docker ps
+system restart docker 
+systemctl restart docker 
+
+history | cut -c 8- > history.txt
+
+
+```
 
 # References
 1. https://kubernetes.io/
